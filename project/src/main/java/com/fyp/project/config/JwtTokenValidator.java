@@ -51,12 +51,8 @@ public class JwtTokenValidator extends OncePerRequestFilter {
                 //response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT Token");
                 throw new BadCredentialsException("invalid token");
             }
-            filterChain.doFilter(request, response);
-        } else {
-            //if no token present, send error response
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing or Invalid Authorization header");
-            return;
-        }   
+        }  
+        filterChain.doFilter(request, response);
 
     }
     
