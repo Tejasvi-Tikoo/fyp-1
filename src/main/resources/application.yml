@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/wild_routes?useSSL=false&serverTimezone=UTC}
+    username: ${DB_USER:wildroutes}
+    password: ${DB_PASSWORD:wildroutes}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+    show-sql: true
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+server:
+  port: 8080
+
+wildroutes:
+  jwt:
+    secret: ${JWT_SECRET:change-me-in-production-please-use-a-secure-random-key}
+    expiration-ms: 604800000 # 7 days
+  storage:
+    upload-dir: uploads
+
+logging:
+  level:
+    org.springframework.security: INFO
+
