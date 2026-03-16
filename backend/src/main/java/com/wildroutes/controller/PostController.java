@@ -3,6 +3,7 @@ package com.wildroutes.controller;
 import com.wildroutes.model.*;
 import com.wildroutes.repository.*;
 import com.wildroutes.exception.ResourceNotFoundException;
+import com.wildroutes.security.CustomUserDetails;
 import com.wildroutes.util.RouteDifficultyUtil;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;

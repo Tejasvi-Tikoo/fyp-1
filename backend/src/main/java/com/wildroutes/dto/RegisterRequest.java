@@ -12,19 +12,3 @@ public class RegisterRequest {
     @NotBlank
     private String password;
 }
-
-@Data
-class LoginRequest {
-    @NotBlank
-    private String username;
-    @NotBlank
-    private String password;
-}
-
-@Data
-class AuthResponse {
-    private String token;
-    private Long userId;
-    private String username;
-}
-
