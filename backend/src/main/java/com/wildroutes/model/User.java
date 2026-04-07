@@ -25,6 +25,10 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
+    private String fullName;
+
+    private String mobileNumber;
+
     @Column(nullable = false)
     private String password;
 
@@ -35,6 +39,7 @@ public class User {
 
     private String travelInterests;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Post> posts = new HashSet<>();
 }

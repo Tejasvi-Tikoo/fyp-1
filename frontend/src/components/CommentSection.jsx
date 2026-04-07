@@ -1,15 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import api from "../services/api.js";
 
 export default function CommentSection({ postId, comments: initialComments }) {
   const [comments, setComments] = useState(initialComments || []);
   const [text, setText] = useState("");
 
+
+  useEffect(() => {
+    setComments(initialComments || []);
+  }, [initialComments]);
   const submit = async e => {
     e.preventDefault();
     if (!text.trim()) return;
     const res = await api.post(`/posts/${postId}/comment`, { content: text });
-    setComments(prev => [...prev, res.data]);
+    setComments(prev => [res.data, ...prev]);
     setText("");
   };
 

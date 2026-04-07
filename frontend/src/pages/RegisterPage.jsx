@@ -20,7 +20,17 @@ export default function RegisterPage() {
       login(data.token, { userId: data.userId, username: data.username });
       navigate("/");
     } catch (err) {
-      setError("Registration failed");
+      console.error("Registration error:", err);
+      console.error("Response status:", err.response?.status);
+      console.error("Response data:", err.response?.data);
+      console.error("Error message:", err.message);
+      if (err.response?.status === 400) {
+        setError("Username or email already exists");
+      } else if (err.response?.status === 500) {
+        setError("Server error: " + (err.response?.data?.message || "Please check console for details"));
+      } else {
+        setError(err.response?.data?.message || err.message || "Registration failed");
+      }
     }
   };
 

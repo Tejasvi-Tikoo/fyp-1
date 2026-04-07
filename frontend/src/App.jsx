@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "./context/AuthContext.jsx";
+
 import Navbar from "./components/Navbar.jsx";
 import HomeFeedPage from "./pages/HomeFeedPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
@@ -10,7 +11,6 @@ import CreatePostPage from "./pages/CreatePostPage.jsx";
 import PostDetailPage from "./pages/PostDetailPage.jsx";
 import ChatPage from "./pages/ChatPage.jsx";
 import GroupsPage from "./pages/GroupsPage.jsx";
-import GroupChatPage from "./pages/GroupChatPage.jsx";
 import ExploreRoutesPage from "./pages/ExploreRoutesPage.jsx";
 
 function PrivateRoute({ children }) {
@@ -22,9 +22,11 @@ export default function App() {
   return (
     <BrowserRouter>
       <Navbar />
+
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+
         <Route
           path="/"
           element={
@@ -33,6 +35,7 @@ export default function App() {
             </PrivateRoute>
           }
         />
+
         <Route
           path="/profile/:id"
           element={
@@ -41,6 +44,7 @@ export default function App() {
             </PrivateRoute>
           }
         />
+
         <Route
           path="/posts/new"
           element={
@@ -49,6 +53,7 @@ export default function App() {
             </PrivateRoute>
           }
         />
+
         <Route
           path="/posts/:id"
           element={
@@ -57,6 +62,7 @@ export default function App() {
             </PrivateRoute>
           }
         />
+
         <Route
           path="/chat"
           element={
@@ -65,6 +71,8 @@ export default function App() {
             </PrivateRoute>
           }
         />
+
+        {/* ✅ ONLY ONE GROUP ROUTE */}
         <Route
           path="/groups"
           element={
@@ -73,14 +81,7 @@ export default function App() {
             </PrivateRoute>
           }
         />
-        <Route
-          path="/groups/:id"
-          element={
-            <PrivateRoute>
-              <GroupChatPage />
-            </PrivateRoute>
-          }
-        />
+
         <Route
           path="/explore"
           element={
@@ -93,4 +94,3 @@ export default function App() {
     </BrowserRouter>
   );
 }
-

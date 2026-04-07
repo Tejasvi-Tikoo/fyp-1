@@ -13,7 +13,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "groups")
+@Table(name = "travelgroups")
 public class Group {
 
     @Id
@@ -33,9 +33,11 @@ public class Group {
     @Column(length = 2000)
     private String tripPlan; // JSON or text describing plan
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<GroupMember> members = new HashSet<>();
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<GroupMessage> messages = new HashSet<>();
 }

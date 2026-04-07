@@ -2,9 +2,10 @@ package com.wildroutes.controller;
 
 import com.wildroutes.model.*;
 import com.wildroutes.repository.*;
+import com.wildroutes.dto.PostResponse;
 import com.wildroutes.exception.ResourceNotFoundException;
 import com.wildroutes.security.CustomUserDetails;
-import com.wildroutes.util.RouteDifficultyUtil;
+
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -18,49 +19,80 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @RestController
 @RequestMapping("/api")
 public class PostController {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-    private final RouteRepository routeRepository;
-    private final FollowerRepository followerRepository;
+    //private final FollowerRepository followerRepository;
     private final LikeRepository likeRepository;
     private final CommentRepository commentRepository;
     private final PostViewRepository postViewRepository;
     private final String uploadDir;
 
+    private PostResponse mapToResponse(Post post, Long currentUserId) {
+
+        boolean liked = false;
+
+        if (currentUserId != null) {
+            liked = likeRepository
+                    .findByUserIdAndPostId(currentUserId, post.getId())
+                    .isPresent();
+        }
+
+        return PostResponse.builder()
+                .id(post.getId())
+                .title(post.getTitle())
+                .story(post.getStory())
+                .imageUrl(post.getImageUrl())
+                .location(post.getLocation())
+                .createdAt(post.getCreatedAt())
+                .username(post.getUser().getUsername())
+                .userId(post.getUser().getId())
+                .liked(liked)
+                .likeCount(0) // 🔥 TEMP FIX
+                .comments(new ArrayList<>()) // 🔥 TEMP FIX
+                .build();
+    }
     public PostController(PostRepository postRepository,
-                          UserRepository userRepository,
-                          RouteRepository routeRepository,
-                          FollowerRepository followerRepository,
-                          LikeRepository likeRepository,
-                          CommentRepository commentRepository,
-                          PostViewRepository postViewRepository,
-                          @Value("${wildroutes.storage.upload-dir}") String uploadDir) {
+            UserRepository userRepository,
+            LikeRepository likeRepository,
+            CommentRepository commentRepository,
+            PostViewRepository postViewRepository,
+            @Value("${wildroutes.storage.upload-dir}") String uploadDir) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
-        this.routeRepository = routeRepository;
-        this.followerRepository = followerRepository;
+        //this.followerRepository = followerRepository;
         this.likeRepository = likeRepository;
         this.commentRepository = commentRepository;
         this.postViewRepository = postViewRepository;
         this.uploadDir = uploadDir;
     }
 
+    // =========================
+    // FEED
+    // =========================
     @GetMapping("/feed")
-    public List<Post> getFeed(@AuthenticationPrincipal CustomUserDetails current) {
-        Long userId = current.getId();
-        List<Follower> following = followerRepository.findByFollowerId(userId);
-        List<Long> ids = new ArrayList<>();
-        for (Follower f : following) {
-            ids.add(f.getFollowing().getId());
-        }
-        ids.add(userId);
-        return postRepository.findByUserIdInOrderByCreatedAtDesc(ids);
+    @Transactional(readOnly = true)
+    public List<PostResponse> getFeed(@AuthenticationPrincipal CustomUserDetails current) {
+
+        Long userId = current != null ? current.getId() : null;
+
+        List<Post> posts = postRepository.findAllByOrderByCreatedAtDesc(); // 🔥 ONLY THIS
+
+        return posts.stream()
+                .map(p -> mapToResponse(p, userId))
+                .toList();
     }
 
+
+
+    // =========================
+    // CREATE POST
+    // =========================
     @PostMapping("/posts")
     public ResponseEntity<Post> createPost(
             @AuthenticationPrincipal CustomUserDetails current,
@@ -68,59 +100,22 @@ public class PostController {
             @RequestPart("story") String story,
             @RequestPart(value = "tags", required = false) String tags,
             @RequestPart(value = "location", required = false) String location,
-            @RequestPart(value = "activityType", required = false) String activityType,
-            @RequestPart(value = "distanceKm", required = false) Double distanceKm,
-            @RequestPart(value = "elevationGainM", required = false) Double elevationGainM,
-            @RequestPart(value = "terrainVariance", required = false) Double terrainVariance,
-            @RequestPart(value = "startLat", required = false) Double startLat,
-            @RequestPart(value = "startLng", required = false) Double startLng,
-            @RequestPart(value = "endLat", required = false) Double endLat,
-            @RequestPart(value = "endLng", required = false) Double endLng,
-            @RequestPart(value = "image", required = false) MultipartFile image,
-            @RequestPart(value = "routeFile", required = false) MultipartFile routeFile
-    ) throws IOException {
+            @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
+
         User user = userRepository.findById(current.getId()).orElseThrow();
 
         new File(uploadDir).mkdirs();
 
         String imageUrl = null;
+
         if (image != null && !image.isEmpty()) {
             String ext = FilenameUtils.getExtension(image.getOriginalFilename());
             String filename = "img_" + System.currentTimeMillis() + "." + ext;
+
             File dest = new File(uploadDir, filename);
             image.transferTo(dest);
+
             imageUrl = "/uploads/" + filename;
-        }
-
-        String gpxPath = null;
-        if (routeFile != null && !routeFile.isEmpty()) {
-            String ext = FilenameUtils.getExtension(routeFile.getOriginalFilename());
-            String filename = "route_" + System.currentTimeMillis() + "." + ext;
-            File dest = new File(uploadDir, filename);
-            routeFile.transferTo(dest);
-            gpxPath = "/uploads/" + filename;
-        }
-
-        Route route = null;
-        if (distanceKm != null && elevationGainM != null && terrainVariance != null) {
-            double score = RouteDifficultyUtil.difficultyScore(distanceKm, elevationGainM, terrainVariance);
-            String category = RouteDifficultyUtil.difficultyCategory(score);
-            route = Route.builder()
-                    .activityType(activityType)
-                    .distanceKm(distanceKm)
-                    .elevationGainM(elevationGainM)
-                    .terrainVariance(terrainVariance)
-                    .difficultyScore(score)
-                    .difficultyCategory(category)
-                    .gpxFilePath(gpxPath)
-                    .location(location)
-                    .startLat(startLat)
-                    .startLng(startLng)
-                    .endLat(endLat)
-                    .endLng(endLng)
-                    .user(user)
-                    .build();
-            routeRepository.save(route);
         }
 
         Post post = Post.builder()
@@ -130,62 +125,99 @@ public class PostController {
                 .location(location)
                 .imageUrl(imageUrl)
                 .user(user)
-                .route(route)
                 .createdAt(Instant.now())
                 .build();
+
         postRepository.save(post);
+
         return ResponseEntity.ok(post);
     }
 
+    // =========================
+    // GET SINGLE POST
+    // =========================
     @GetMapping("/posts/{id}")
     public ResponseEntity<Post> getPost(@PathVariable Long id,
-                                        @AuthenticationPrincipal CustomUserDetails current) {
+            @AuthenticationPrincipal CustomUserDetails current) {
+
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + id));
 
-        // Record view if user is authenticated
         if (current != null) {
             Long userId = current.getId();
+
             postViewRepository.findByUserIdAndPostId(userId, id)
                     .orElseGet(() -> postViewRepository.save(
                             PostView.builder()
                                     .user(userRepository.findById(userId).orElse(null))
                                     .post(post)
                                     .viewedAt(Instant.now())
-                                    .build()
-                    ));
+                                    .build()));
         }
 
         return ResponseEntity.ok(post);
     }
 
+    // =========================
+    // LIKE POST
+    // =========================
     @PostMapping("/posts/{id}/like")
-    public ResponseEntity<Void> like(@PathVariable Long id,
-                                     @AuthenticationPrincipal CustomUserDetails current) {
+    public ResponseEntity<String> toggleLike(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails current) {
+
         Post post = postRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
+
         Long userId = current.getId();
-        likeRepository.findByUserIdAndPostId(userId, post.getId())
-                .orElseGet(() -> likeRepository.save(
-                        Like.builder().user(userRepository.findById(userId).orElse(null)).post(post).build()
-                ));
-        return ResponseEntity.ok().build();
+
+        return likeRepository.findByUserIdAndPostId(userId, id)
+                .map(existing -> {
+                    likeRepository.delete(existing);
+                    return ResponseEntity.ok("unliked");
+                })
+                .orElseGet(() -> {
+                    Like like = Like.builder()
+                            .user(userRepository.findById(userId).orElse(null))
+                            .post(post)
+                            .build();
+
+                    likeRepository.save(like);
+                    return ResponseEntity.ok("liked");
+                });
     }
 
+    // =========================
+    // COMMENT
+    // =========================
     @PostMapping("/posts/{id}/comment")
     public ResponseEntity<Comment> comment(@PathVariable Long id,
-                                           @AuthenticationPrincipal CustomUserDetails current,
-                                           @RequestBody Comment payload) {
+            @AuthenticationPrincipal CustomUserDetails current,
+            @RequestBody Comment payload) {
+
         Post post = postRepository.findById(id).orElseThrow();
         User user = userRepository.findById(current.getId()).orElseThrow();
+
         Comment comment = Comment.builder()
                 .content(payload.getContent())
                 .createdAt(Instant.now())
                 .user(user)
                 .post(post)
                 .build();
+
         commentRepository.save(comment);
-        return ResponseEntity.ok(comment);
+
+        return ResponseEntity.ok(
+                        Comment.builder()
+                                        .id(comment.getId())
+                                        .content(comment.getContent())
+                                        .createdAt(comment.getCreatedAt())
+                                        .user(user) // safe
+                                        .build());
+    }
+
+    @GetMapping("/posts/{id}/comments")
+    public List<Comment> getComments(@PathVariable Long id) {
+        return commentRepository.findByPostIdOrderByCreatedAtDesc(id);
     }
 }
-

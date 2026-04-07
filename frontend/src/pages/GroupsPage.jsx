@@ -1,69 +1,97 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import api from "../services/api.js";
+import GroupChatPage from "./GroupChatPage.jsx";
+import CreateGroup from "../pages/CreateGroup.jsx";
 
 export default function GroupsPage() {
-  const [memberships, setMemberships] = useState([]);
-  const [name, setName] = useState("");
-  const [location, setLocation] = useState("");
-  const [tripPlan, setTripPlan] = useState("");
-  const navigate = useNavigate();
+  const [groups, setGroups] = useState([]);
+  const [activeGroup, setActiveGroup] = useState(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const load = async () => {
-    const res = await api.get("/groups");
-    setMemberships(res.data);
+  const loadGroups = async () => {
+    try {
+      const res = await api.get("/groups");
+
+      console.log("GROUPS API:", res.data);
+
+      // 🔥 normalize backend response safely
+      const list = res.data.map(g => g.group || g);
+
+      setGroups(list);
+    } catch (err) {
+      console.error("Failed to load groups", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    load();
+    loadGroups();
   }, []);
 
-  const createGroup = async e => {
-    e.preventDefault();
-    const res = await api.post("/groups", { name, location, tripPlan });
-    setName("");
-    setLocation("");
-    setTripPlan("");
-    navigate(`/groups/${res.data.id}`);
-  };
-
   return (
-    <div className="page groups-page">
-      <h2>Travel Groups</h2>
-      <form className="post-form" onSubmit={createGroup}>
-        <input
-          value={name}
-          onChange={e => setName(e.target.value)}
-          placeholder="Group name"
-        />
-        <input
-          value={location}
-          onChange={e => setLocation(e.target.value)}
-          placeholder="Location"
-        />
-        <textarea
-          value={tripPlan}
-          onChange={e => setTripPlan(e.target.value)}
-          placeholder="Trip plan (dates, routes, notes)"
-        />
-        <button type="submit">Create Group</button>
-      </form>
+    <div className="page chat-page">
+      <h2>Groups</h2>
 
-      <h3>Your Groups</h3>
-      <div className="groups-list">
-        {memberships.map(m => (
-          <button
-            key={m.id}
-            className="group-card"
-            onClick={() => navigate(`/groups/${m.group.id}`)}
-          >
-            <strong>{m.group.name}</strong>
-            <div>{m.group.location}</div>
+      <div className="chat-layout">
+
+        {/* LEFT SIDEBAR */}
+        <aside className="chat-sidebar">
+
+          <button onClick={() => setShowCreate(true)}>
+            + Create Group
           </button>
-        ))}
+
+          {loading ? (
+            <p>Loading...</p>
+          ) : groups.length === 0 ? (
+            <p>No groups yet</p>
+          ) : (
+            groups.map(g => (
+              <button
+                key={g.id}
+                className={
+                  activeGroup?.id === g.id ? "peer active" : "peer"
+                }
+                onClick={() => {
+                  setActiveGroup(g);
+                  setShowCreate(false);
+                }}
+              >
+                {g.name}
+              </button>
+            ))
+          )}
+
+        </aside>
+
+        {/* RIGHT PANEL */}
+        <main className="chat-main">
+
+          {showCreate ? (
+            <CreateGroup
+              onCreated={(g) => {
+                setShowCreate(false);
+                loadGroups();
+                setActiveGroup(g);
+              }}
+            />
+          ) : activeGroup ? (
+            <GroupChatPage
+              groupId={activeGroup.id}
+              onDeleted={() => {
+                setActiveGroup(null);
+                loadGroups();
+              }}
+            />
+          ) : (
+            <p>Select a group</p>
+          )}
+
+        </main>
+
       </div>
     </div>
   );
 }
-
-

@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/wild_routes?useSSL=false&serverTimezone=UTC}
-    username: ${DB_USER:wildroutes}
-    password: ${DB_PASSWORD:wildroutes}
+    url: jdbc:mysql://localhost:3306/fyproject1?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password: mysqlpwd
   jpa:
     hibernate:
       ddl-auto: update
@@ -23,7 +23,7 @@ wildroutes:
     secret: ${JWT_SECRET:change-me-in-production-please-use-a-secure-random-key}
     expiration-ms: 604800000 # 7 days
   storage:
-    upload-dir: uploads
+    upload-dir: C:\Users\tejas
 
 logging:
   level:

@@ -6,7 +6,17 @@ export default function HomeFeedPage() {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    api.get("/feed").then(res => setPosts(res.data));
+    let mounted = true;
+
+    api.get("/feed")
+      .then(res => {
+        if (mounted) setPosts(res.data);
+      })
+      .catch(err => {
+        console.error("Feed error:", err);
+      });
+
+    return () => { mounted = false };
   }, []);
 
   return (

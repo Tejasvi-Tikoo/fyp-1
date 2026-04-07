@@ -1,9 +1,11 @@
+/* ===== GLOBAL ===== */
 body {
   margin: 0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: #fafafa;
 }
 
+/* ===== NAVBAR ===== */
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -26,15 +28,18 @@ body {
   font-weight: 700;
 }
 
+/* ===== PAGE ===== */
 .page {
   max-width: 900px;
   margin: 1rem auto;
   padding: 0 1rem;
 }
 
+/* ===== FORMS ===== */
 .auth-form,
 .post-form,
-.filter-form {
+.filter-form,
+.profile-edit-form {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -47,6 +52,11 @@ button {
   padding: 0.5rem;
   border-radius: 4px;
   border: 1px solid #ccc;
+  font-size: 0.9rem;
+}
+
+textarea {
+  resize: vertical;
 }
 
 button {
@@ -54,34 +64,126 @@ button {
   color: #fff;
   border: none;
   cursor: pointer;
+  transition: 0.2s ease;
 }
 
 button:hover {
   background: #0077c8;
 }
 
+/* ===== POST CARD ===== */
 .post-card {
   background: #fff;
   border: 1px solid #ddd;
-  border-radius: 6px;
+  border-radius: 8px;
   margin-bottom: 1rem;
+  overflow: hidden;
 }
 
-.post-header,
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  padding: 0.75rem;
+}
+
 .post-body {
   padding: 0.75rem;
+}
+
+.post-body h3 {
+  margin: 0.25rem 0;
+}
+
+.post-body p {
+  margin: 0.25rem 0;
 }
 
 .post-image {
   width: 100%;
   max-height: 450px;
   object-fit: cover;
+  background: #eee;
 }
 
+.post-meta {
+  font-size: 0.85rem;
+  color: #777;
+  margin-top: 0.25rem;
+}
+
+.post-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.post-actions button {
+  background: transparent;
+  color: #0095f6;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.post-actions button:hover {
+  text-decoration: underline;
+}
+
+/* ===== COMMENTS ===== */
 .comments {
   margin-top: 0.5rem;
 }
 
+/* ===== PROFILE PAGE ===== */
+.profile-header {
+  display: flex;
+  gap: 1rem;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.profile-photo {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #eee;
+}
+
+.profile-header h2 {
+  margin: 0;
+}
+
+.profile-header p {
+  margin: 2px 0;
+  color: #555;
+}
+
+.profile-stats {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+.profile-edit-form {
+  background: #fff;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.button-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* ===== CHAT ===== */
 .chat-window {
   border: 1px solid #ddd;
   border-radius: 6px;
@@ -145,6 +247,7 @@ button:hover {
   color: #fff;
 }
 
+/* ===== GROUPS ===== */
 .groups-list {
   margin-top: 1rem;
   display: grid;
@@ -174,4 +277,3 @@ button:hover {
 .group-main {
   flex: 1;
 }
-
