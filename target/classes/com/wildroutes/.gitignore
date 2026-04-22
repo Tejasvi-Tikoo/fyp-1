@@ -1,0 +1,7 @@
+target/
+*.log
+.env
+application.yml
+node_modules/
+.idea/
+.vscode/
