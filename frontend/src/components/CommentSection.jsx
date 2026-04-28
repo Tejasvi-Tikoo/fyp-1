@@ -28,11 +28,12 @@ export default function CommentSection({ postId, comments: initialComments }) {
       </div>
       <form onSubmit={submit} className="comment-form">
         <input
+          className="comment-input"
           value={text}
           onChange={e => setText(e.target.value)}
           placeholder="Add a comment..."
         />
-        <button type="submit">Post</button>
+        <button type="submit" className="comment-btn">Post</button>
       </form>
     </div>
   );

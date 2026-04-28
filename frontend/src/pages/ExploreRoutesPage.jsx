@@ -24,7 +24,13 @@ export default function ExploreRoutesPage() {
 
   return (
     <div className="page explore-page">
-      <h2>Explore Routes</h2>
+      <div className="page-banner">
+        <img src="https://picsum.photos/seed/explore-mountains/1400/500" alt="Explore routes banner" />
+        <div className="page-banner-overlay">
+          <h2>Explore Routes</h2>
+          <p>Filter trails by activity, difficulty, and location.</p>
+        </div>
+      </div>
       <form onSubmit={search} className="filter-form">
         <input
           value={activityType}
@@ -48,6 +54,11 @@ export default function ExploreRoutesPage() {
       <div className="routes-list">
         {routes.map(r => (
           <div key={r.id} className="route-card">
+            <img
+              className="route-cover"
+              src={`https://picsum.photos/seed/route-${r.id}/900/350`}
+              alt={`${r.activityType} route`}
+            />
             <h3>{r.activityType}</h3>
             <p>{r.location}</p>
             <p>

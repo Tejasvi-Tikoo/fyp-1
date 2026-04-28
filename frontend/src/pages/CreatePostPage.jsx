@@ -49,7 +49,13 @@ export default function CreatePostPage() {
 
   return (
     <div className="page create-post-page">
-      <h2>Create Travel Post</h2>
+      <div className="page-banner">
+        <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1400&q=80" alt="Create post banner" />
+        <div className="page-banner-overlay">
+          <h2>Create Travel Post</h2>
+          <p>Upload a strong cover image and share your story with details.</p>
+        </div>
+      </div>
 
       <form onSubmit={submit} className="post-form">
         {/* Title */}

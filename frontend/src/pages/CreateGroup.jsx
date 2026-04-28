@@ -35,14 +35,14 @@ export default function CreateGroup({ onCreated }) {
     };
 
     return (
-        <div>
-            <h3>Create Group</h3>
-
-            <form onSubmit={create}>
+        <div className="group-create-panel">
+            <form onSubmit={create} className="group-create-form">
+                <div className="group-form-grid">
                 <input
                     value={name}
                     onChange={e => setName(e.target.value)}
                     placeholder="Group name"
+                    required
                 />
 
                 <input
@@ -55,22 +55,29 @@ export default function CreateGroup({ onCreated }) {
                     value={tripPlan}
                     onChange={e => setTripPlan(e.target.value)}
                     placeholder="Trip plan"
+                    rows={4}
                 />
+                </div>
 
-                <h4>Select Members</h4>
+                <div className="member-select-head">
+                    <h4>Select Members</h4>
+                    <span>{selected.length} selected</span>
+                </div>
                 <div className="user-select">
                     {users.map(u => (
-                        <label key={u.id}>
+                        <label key={u.id} className="member-option">
                             <input
                                 type="checkbox"
+                                className="member-checkbox"
+                                checked={selected.includes(u.id)}
                                 onChange={() => toggleUser(u.id)}
                             />
-                            {u.username}
+                            <span>{u.username}</span>
                         </label>
                     ))}
                 </div>
 
-                <button type="submit">Create</button>
+                <button type="submit">Create Group</button>
             </form>
         </div>
     );

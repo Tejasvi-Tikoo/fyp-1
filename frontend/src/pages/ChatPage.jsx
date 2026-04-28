@@ -43,7 +43,13 @@ export default function ChatPage() {
 
   return (
     <div className="page chat-page">
-      <h2>Direct Messages</h2>
+      <div className="page-banner">
+        <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1400&q=80" alt="Direct messages banner" />
+        <div className="page-banner-overlay">
+          <h2>Direct Messages</h2>
+          <p>Start quick conversations with your fellow explorers.</p>
+        </div>
+      </div>
 
       <div className="chat-layout">
 

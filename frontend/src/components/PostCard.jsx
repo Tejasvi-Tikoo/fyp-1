@@ -37,6 +37,7 @@ export default function PostCard({ post }) {
 
       {/* IMAGE */}
       <img
+        className="post-image"
         src={
           post.imageUrl
             ? `${BASE_URL}${post.imageUrl}`
@@ -61,7 +62,7 @@ export default function PostCard({ post }) {
           <button onClick={handleLike}>
             {liked ? "💔 Unlike" : "❤️ Like"} ({likeCount})
           </button>
-          <Link to={`/posts/${post.id}`}>Open</Link>
+          <Link className="open-post-link" to={`/posts/${post.id}`}>Open</Link>
         </div>
 
         {/* COMMENTS */}

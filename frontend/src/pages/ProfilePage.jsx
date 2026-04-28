@@ -43,6 +43,8 @@ export default function ProfilePage() {
   if (!profile) return <div className="page">Loading...</div>;
 
   const { user, posts, followersCount, followingCount } = profile;
+  const safeFollowersCount = Number.isFinite(followersCount) ? followersCount : 0;
+  const safeFollowingCount = Number.isFinite(followingCount) ? followingCount : 0;
   const isOwnProfile = authUser && String(authUser.userId) === String(id);
 
   // ✅ OPEN EDIT (prefill form)
@@ -97,6 +99,13 @@ export default function ProfilePage() {
 
   return (
     <div className="page profile-page">
+      <div className="page-banner profile-banner">
+        <img src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=1400&q=80" alt="Profile banner" />
+        <div className="page-banner-overlay">
+          <h2>Profile</h2>
+          <p>Show your identity, bio, and route journey.</p>
+        </div>
+      </div>
 
       {/* HEADER */}
       <div className="profile-header">
@@ -119,8 +128,8 @@ export default function ProfilePage() {
 
           <div className="profile-stats">
             <span><strong>{posts?.length || 0}</strong> posts</span>
-            <span><strong>{followersCount}</strong> followers</span>
-            <span><strong>{followingCount}</strong> following</span>
+            <span><strong>{safeFollowersCount}</strong> followers</span>
+            <span><strong>{safeFollowingCount}</strong> following</span>
           </div>
 
           {isOwnProfile && !editMode && (

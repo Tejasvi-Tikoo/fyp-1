@@ -9,6 +9,18 @@ export default function ChatWindow({ currentUser, peerUser }) {
   const clientRef = useRef(null);
   const messagesEndRef = useRef(null);
 
+  const formatMessageTime = (timestamp) => {
+    if (!timestamp) return "";
+    const d = new Date(timestamp);
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toLocaleString([], {
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   // =====================
   // LOAD HISTORY
   // =====================
@@ -45,7 +57,24 @@ export default function ChatWindow({ currentUser, peerUser }) {
             body.senderId === peerUser.userId ||
             body.receiverId === peerUser.userId
           ) {
-            setMessages(prev => [...prev, body]);
+            setMessages(prev => {
+              // Replace a matching optimistic message so sent messages appear instantly
+              const pendingIndex = prev.findIndex(
+                m =>
+                  m.pending &&
+                  m.senderId === body.senderId &&
+                  m.receiverId === body.receiverId &&
+                  m.content === body.content
+              );
+
+              if (pendingIndex !== -1) {
+                const next = [...prev];
+                next[pendingIndex] = body;
+                return next;
+              }
+
+              return [...prev, body];
+            });
           }
         });
       },
@@ -64,12 +93,22 @@ export default function ChatWindow({ currentUser, peerUser }) {
     e.preventDefault();
     if (!text.trim() || !clientRef.current) return;
 
+    const content = text.trim();
+
     const payload = {
       senderId: currentUser.userId,
       receiverId: peerUser.userId,
-      content: text,
+      content,
       type: "DIRECT",
     };
+
+    setMessages(prev => [
+      ...prev,
+      {
+        ...payload,
+        pending: true,
+      },
+    ]);
 
     clientRef.current.publish({
       destination: "/app/chat.send",
@@ -96,7 +135,10 @@ export default function ChatWindow({ currentUser, peerUser }) {
             key={i}
             className={m.senderId === currentUser.userId ? "message own" : "message"}
           >
-            {m.content}
+            <div>{m.content}</div>
+            <small className="message-time">
+              {m.pending ? "Sending..." : formatMessageTime(m.timestamp)}
+            </small>
           </div>
         ))}
         <div ref={messagesEndRef} />

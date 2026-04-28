@@ -106,30 +106,39 @@ export default function GroupChatPage({ groupId, onDeleted }) {
 
       {/* HEADER */}
       <div className="group-header">
-        <h3>{group.name}</h3>
+        <div>
+          <h3>{group.name}</h3>
+          <p className="group-subtitle">{group.location || "No location added"}</p>
+        </div>
 
         <button className="danger" onClick={deleteGroup}>
           Delete
         </button>
       </div>
 
-      <p>{group.location}</p>
-      <p>{group.tripPlan}</p>
+      <p className="group-trip-plan">{group.tripPlan || "No trip plan has been added yet."}</p>
 
       <div className="group-layout">
 
         {/* MEMBERS */}
         <aside className="group-sidebar">
-          <h4>Members</h4>
-          {members.length === 0 ? (
-            <p>No members</p>
-          ) : (
-            members.map(m => (
-              <div key={m.id}>
-                {m.username || "Unknown"}
-              </div>
-            ))
-          )}
+          <details className="members-dropdown">
+            <summary>Members ({members.length})</summary>
+            <div className="members-dropdown-body">
+              {members.length === 0 ? (
+                <p>No members</p>
+              ) : (
+                members.map(m => (
+                  <div key={m.id} className="member-row">
+                    <span className="member-avatar">
+                      {(m.username || "U").charAt(0).toUpperCase()}
+                    </span>
+                    <span>{m.username || "Unknown"}</span>
+                  </div>
+                ))
+              )}
+            </div>
+          </details>
         </aside>
 
         {/* CHAT */}
